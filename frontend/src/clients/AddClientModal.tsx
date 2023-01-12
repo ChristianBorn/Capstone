@@ -48,7 +48,7 @@ function AddClientModal(props: ModalProps) {
         event.preventDefault()
         selectContent?.map(selectedOption => newClient.ownsHorse.push(selectedOption.value))
         console.log(newClient)
-        axios.post("/clients/", newClient)
+        axios.put("/clients/", newClient)
             .catch((e) => console.error("POST Error: " + e))
             .then(props.reloadClients)
             .then(props.closeModal)

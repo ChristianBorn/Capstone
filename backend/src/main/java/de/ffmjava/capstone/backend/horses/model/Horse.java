@@ -12,8 +12,20 @@ public record Horse(
         String id,
         @NotBlank(message = "Feld \"Name\" darf nicht leer sein")
         String name,
-        @NotBlank(message = "Feld \"Besitzer\" darf nicht leer sein")
         String owner,
         List<Consumption> consumptionList
 ) {
+    public static Horse createHorseFromDTO(HorseDTO horseTransferObject) {
+        String ownerId;
+        if (horseTransferObject.owner() == null) {
+            ownerId = "";
+        }
+        else {
+            ownerId = horseTransferObject.owner().id();
+        }
+        return new Horse(horseTransferObject.id(),
+                horseTransferObject.name(),
+                ownerId,
+                horseTransferObject.consumptionList());
+    }
 }

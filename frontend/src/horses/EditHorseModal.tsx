@@ -76,16 +76,6 @@ function EditHorseModal(props: ModalProps) {
                                 className={"error-message"}>{errorMessages.name}</p></div>}
                     </FieldLabelGroup>
 
-                    <FieldLabelGroup>
-                        <label htmlFor={"owner"}>Besitzer</label>
-                        <input value={editedHorse.owner} onChange={handleChange} required
-                               type={"text"}
-                               id={"owner"} name={"owner"}/>
-                        {errorMessages.owner &&
-                            <div className={"message-container"}><p
-                                className={"error-message"}>{errorMessages.owner}</p></div>}
-                    </FieldLabelGroup>
-
                     <div className={"button-group"}>
                         <button className={"submit-button"} type={"submit"}>Änderungen speichern</button>
                     </div>

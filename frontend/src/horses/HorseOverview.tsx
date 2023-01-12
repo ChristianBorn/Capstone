@@ -19,7 +19,7 @@ function HorseOverview() {
     const [successMessage, setSuccessMessage] = useState<string>()
     const [idToDelete, setIdToDelete] = useState<string>("")
     const [horseToEdit, setHorseToEdit] = useState<HorseModel>(
-        {id: "", name: "", owner: "", consumptionList: []})
+        {id: "", name: "", owner: {id: "", name: "", ownsHorse: []}, consumptionList: []})
     const [openModal, setOpenModal] = useState<"add" | "edit" | "delete" | "addConsumption">()
 
     const openAddModal = () => {
@@ -43,7 +43,6 @@ function HorseOverview() {
     }
     const closeModal = () => {
         setOpenModal(undefined)
-
     }
     const getAllStockItems = () => {
         axios.get("/stock/")
@@ -122,7 +121,7 @@ function HorseOverview() {
                             {horses.map(horse => {
                                 return <tr key={horse.id}>
                                     <td><strong>{horse.name}</strong></td>
-                                    <td>{horse.owner}</td>
+                                    <td>{horse.owner.name}</td>
                                     <td>
                                         <div className={"consumption-cell"}>
                                             {horse.consumptionList.length > 0 ? horse.consumptionList

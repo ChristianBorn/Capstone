@@ -1,12 +1,17 @@
 package de.ffmjava.capstone.backend.horses;
 
+import de.ffmjava.capstone.backend.clients.ClientRepository;
+import de.ffmjava.capstone.backend.clients.model.Client;
 import de.ffmjava.capstone.backend.horses.model.Consumption;
 import de.ffmjava.capstone.backend.horses.model.Horse;
+import de.ffmjava.capstone.backend.horses.model.HorseDTO;
 import de.ffmjava.capstone.backend.stock.StockRepository;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,15 +21,43 @@ class HorseServiceTest {
 
     private final HorseRepository mockHorseRepository = mock(HorseRepository.class);
     private final StockRepository mockStockRepository = mock(StockRepository.class);
-    private final HorseService service = new HorseService(mockHorseRepository, mockStockRepository);
+    private final ClientRepository mockClientRepository = mock(ClientRepository.class);
+    private final HorseService service = new HorseService(mockHorseRepository, mockStockRepository, mockClientRepository);
 
     @Test
-    void getAllHorses() {
+    void getAllHorses_returnEmptyList() {
         //Given
         //When
         when(mockHorseRepository.findAll()).thenReturn(List.of());
-        List<Horse> expected = List.of();
-        List<Horse> actual = service.getAllHorses();
+        List<HorseDTO> expected = List.of();
+        List<HorseDTO> actual = service.getAllHorses();
+        //Then
+        assertEquals(expected, actual);
+    }
+    @Test
+    void getAllHorses_withOwnerNotPresent() {
+        //Given
+        Horse retrievedHorse = new Horse("id", "name", "", List.of());
+        HorseDTO returnedHorse = new HorseDTO("id", "name", null, List.of());
+        //When
+        when(mockHorseRepository.findAll()).thenReturn(List.of(retrievedHorse));
+        when(mockClientRepository.findById("")).thenReturn(Optional.empty());
+        List<HorseDTO> expected = List.of(returnedHorse);
+        List<HorseDTO> actual = service.getAllHorses();
+        //Then
+        assertEquals(expected, actual);
+    }
+    @Test
+    void getAllHorses_withOwnerPresent() {
+        //Given
+        Horse retrievedHorse = new Horse("id", "name", "id", List.of());
+        Client retrievedClient = new Client("id", "name", List.of("id"));
+        HorseDTO returnedHorse = new HorseDTO("id", "name", retrievedClient, List.of());
+        //When
+        when(mockHorseRepository.findAll()).thenReturn(List.of(retrievedHorse));
+        when(mockClientRepository.findById("id")).thenReturn(Optional.of(retrievedClient));
+        List<HorseDTO> expected = List.of(returnedHorse);
+        List<HorseDTO> actual = service.getAllHorses();
         //Then
         assertEquals(expected, actual);
     }
@@ -74,35 +107,43 @@ class HorseServiceTest {
     @Test
     void UpdateHorse_AndExpectSuccess_201() {
         //Given
-        Horse newHorse = new Horse("id", "name", "owner",
+        Client owner = new Client("1", "name", List.of("1"));
+        HorseDTO newHorse = new HorseDTO("1", "name", owner,
                 List.of(new Consumption("1", "name", new BigDecimal("0"))));
+        Horse savedHorse = Horse.createHorseFromDTO(newHorse);
         //When
         when(mockStockRepository.existsById("1")).thenReturn(true);
         when(mockHorseRepository.existsById("id")).thenReturn(false);
+        when(mockHorseRepository.save(any())).thenReturn(savedHorse.withId(UUID.randomUUID().toString()));
         //Then
-        assertFalse(service.updateHorse(newHorse));
-        verify(mockHorseRepository).save(any());
-
+        HorseDTO actual = service.updateHorse(newHorse);
+        HorseDTO expected = newHorse.withId(actual.id());
+        assertEquals(expected, actual);
     }
 
     @Test
     void UpdateHorse_AndExpectSuccess_200() {
         //Given
-        Horse newHorse = new Horse("id", "name", "owner",
+        Client owner = new Client("1", "name", List.of("1"));
+        HorseDTO newHorse = new HorseDTO("1", "name", owner,
                 List.of(new Consumption("1", "name", new BigDecimal("0"))));
+        Horse horseToSave = new Horse("1", "name", "1", List.of(new Consumption("1", "name", new BigDecimal("0"))));
         //When
         when(mockStockRepository.existsById("1")).thenReturn(true);
-        when(mockHorseRepository.existsById("id")).thenReturn(true);
+        when(mockHorseRepository.existsById("1")).thenReturn(true);
         //Then
-        assertTrue(service.updateHorse(newHorse));
-        verify(mockHorseRepository).save(newHorse);
+        HorseDTO actual = service.updateHorse(newHorse);
+        HorseDTO expected = newHorse;
+        assertEquals(expected, actual);
+        verify(mockHorseRepository).save(horseToSave);
 
     }
 
     @Test
     void UpdateHorse_AndExpectException_400() {
         //Given
-        Horse newHorse = new Horse("id", "name", "owner",
+        Client owner = new Client("1", "name", List.of("1"));
+        HorseDTO newHorse = new HorseDTO("id", "name", owner,
                 List.of(new Consumption("1", "name", new BigDecimal("0")),
                         new Consumption("1", "name", new BigDecimal("0"))));
         //When
@@ -118,8 +159,10 @@ class HorseServiceTest {
     @Test
     void UpdateHorse_NoMatchingStockItem_AndExpectException_400() {
         //Given
-        Horse newHorse = new Horse("id", "name", "owner",
-                List.of(new Consumption("1", "name", new BigDecimal("0"))));
+        Client owner = new Client("1", "name", List.of("1"));
+        HorseDTO newHorse = new HorseDTO("id", "name", owner,
+                List.of(new Consumption("1", "name", new BigDecimal("0")),
+                        new Consumption("2", "name", new BigDecimal("0"))));
         //When
         when(mockStockRepository.existsById("1")).thenReturn(false);
         //Then

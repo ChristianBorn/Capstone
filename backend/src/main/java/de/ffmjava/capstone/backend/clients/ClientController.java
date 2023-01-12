@@ -1,6 +1,7 @@
 package de.ffmjava.capstone.backend.clients;
 
 import de.ffmjava.capstone.backend.clients.model.Client;
+import de.ffmjava.capstone.backend.clients.model.ClientDTO;
 import de.ffmjava.capstone.backend.user.CustomApiErrorHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,12 +21,12 @@ public class ClientController {
     private final ClientService service;
 
     @GetMapping
-    List<Client> getAllClients() {
+    List<ClientDTO> getAllClients() {
         return service.getAllClients();
     }
 
     @PostMapping
-    public ResponseEntity<Object> addNewClient(@Valid @RequestBody Client newClient, Errors errors) {
+    public ResponseEntity<Object> addNewClient(@Valid @RequestBody ClientDTO newClient, Errors errors) {
         ResponseEntity<Object> errorMessage = CustomApiErrorHandler.handlePossibleErrors(errors);
         if (errorMessage != null) return errorMessage;
         Client createdClient = service.addNewClient(newClient);
@@ -43,7 +44,7 @@ public class ClientController {
     }
 
     @PutMapping
-    public ResponseEntity<Object> updateClient(@Valid @RequestBody Client updatedClient, Errors errors) {
+    public ResponseEntity<Object> updateClient(@Valid @RequestBody ClientDTO updatedClient, Errors errors) {
         ResponseEntity<Object> errorMessage = CustomApiErrorHandler.handlePossibleErrors(errors);
         if (errorMessage != null) return errorMessage;
         try {

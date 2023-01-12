@@ -19,7 +19,7 @@ function AddHorseModal(props: ModalProps) {
         name: "", owner: ""
     })
     const [newHorse, setNewHorse] = useState<HorseModel>({
-        id: "", name: "", owner: "", consumptionList: []
+        id: "", name: "", owner: {id: "", name: "", ownsHorse: []}, consumptionList: []
     })
     useEffect(() => {
         setErrorMessages({name: "", owner: ""})
@@ -40,7 +40,7 @@ function AddHorseModal(props: ModalProps) {
             })
             .then(props.reloadHorses)
             .then(props.closeModal)
-            .then(() => setNewHorse({id: "", name: "", owner: "", consumptionList: []}))
+            .then(() => setNewHorse({id: "", name: "", owner: {id: "", name: "", ownsHorse: []}, consumptionList: []}))
             .then(() => props.setSuccessMessage("Eintrag erfolgreich hinzugefügt"))
     }
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -68,16 +68,6 @@ function AddHorseModal(props: ModalProps) {
                         {errorMessages.name &&
                             <div className={"message-container"}><p
                                 className={"error-message"}>{errorMessages.name}</p></div>}
-                    </FieldLabelGroup>
-
-                    <FieldLabelGroup>
-                        <label htmlFor={"owner"}>Besitzer</label>
-                        <input onChange={handleChange} required
-                               type={"text"}
-                               id={"owner"} name={"owner"}/>
-                        {errorMessages.owner &&
-                            <div className={"message-container"}><p
-                                className={"error-message"}>{errorMessages.owner}</p></div>}
                     </FieldLabelGroup>
 
                     <div className={"button-group"}>
